@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.zeratul.bean">
+	<class name="BaseDict" table="base_dict">
+		<id name="dictId" column="dict_id">
+			<generator class="assigned"></generator>
+		</id>
+
+		<property name="typeCode" column="dict_type_code"></property>
+		<property name="typeName" column="dict_type_name"></property>
+		<property name="itemCode" column="dict_item_code"></property>
+		<property name="itemName" column="dict_item_name"></property>
+		<property name="dictSort" column="dict_sort"></property>
+		<property name="enable" column="dict_enable"></property>
+		<property name="dictMemo" column="dict_memo"></property>
+
+	</class>
+</hibernate-mapping>

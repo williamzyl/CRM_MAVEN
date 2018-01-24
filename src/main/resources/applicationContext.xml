@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:aop="http://www.springframework.org/schema/aop" 
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+							http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+							http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+							http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+
+
+	<!-- C3p0 数据池配置 -->
+	<context:property-placeholder location="classpath:db.properties" />
+	<bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+
+	<!-- hibernate sessionFactory 配置 -->
+	<bean name="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+
+		<!-- 链接池配置 -->
+		<property name="dataSource" ref="dataSource"></property>
+
+		<!--在spring 中配置 hibernete -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- 必选配置 -->
+				<!-- <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop> 
+					<prop key="hibernate.connection.url">jdbc:mysql://localhost:5465/crm</prop> 
+					<prop key="hibernate.connection.username">root</prop> <prop key="hibernate.connection.password">william</prop> -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<!-- 可选配置 -->
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<!-- 引入元数据 -->
+		<property name="mappingDirectoryLocations" value="classpath:com/zeratul/bean"></property>
+
+	</bean>
+
+	<!-- aop 事务 -->
+
+	<!-- 配置spring事务 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- 声明式事务管理 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="select*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="get*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="query*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="methodService"
+			expression="execution(* com.zeratul.service.*.*(..))" />
+		<aop:advisor pointcut-ref="methodService" advice-ref="txAdvice" />
+	</aop:config>
+
+
+
+
+
+	<!-- action 配置 -->
+	<bean name="userAction" class="com.zeratul.web.action.UserAction"
+		scope="prototype">
+		<property name="userService" ref="userService"></property>
+	</bean>
+	
+	<bean name="customerAction" class="com.zeratul.web.action.CustomerAction"
+		scope="prototype">
+		<property name="cs" ref="customerService"></property>
+	</bean>
+	
+	<bean name="baseDictAction" class="com.zeratul.web.action.BaseDictAction"
+		scope="prototype">
+		<property name="bds" ref="baseDictService"></property>
+	</bean>
+	
+	<bean name="linkmanAction" class="com.zeratul.web.action.LinkmanAction"
+		scope="prototype">
+		<property name="ls" ref="linkmanService"></property>
+	</bean>
+	
+		<bean name="saleVisitAction" class="com.zeratul.web.action.SaleVisitAction"
+		scope="prototype">
+		<property name="svs" ref="saleVisitService"></property>
+	</bean>
+	
+	
+	<!-- service 配置 -->
+	<bean name="userService" class="com.zeratul.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+	
+	<bean name="customerService" class="com.zeratul.service.impl.CustomerServiceImpl">
+		<property name="customerDao" ref="customerDao"></property>
+	</bean>
+	
+	<bean name="baseDictService" class="com.zeratul.service.impl.BaseDictServiceImpl">
+		<property name="bdd" ref="baseDictDao"></property>
+	</bean>
+	
+	<bean name="linkmanService" class="com.zeratul.service.impl.LinkmanServiceImpl">
+		<property name="ld" ref="linkmanDao"></property>
+	</bean>
+	
+	<bean name="saleVisitService" class="com.zeratul.service.impl.SaleVisitServiceImpl">
+		<property name="svd" ref="saleVisitDao"></property>
+	</bean>
+	
+	
+	<!-- dao 配置 -->
+	<bean name="userDao" class="com.zeratul.dao.impl.UserDaoImpl">
+		<!-- 需要给到配置 sessionFactory -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean name="customerDao" class="com.zeratul.dao.impl.CustomerDaoImpl">
+		<!-- 需要给到配置 sessionFactory -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean name="baseDictDao" class="com.zeratul.dao.impl.BaseDictDaoImpl">
+		<!-- 需要给到配置 sessionFactory -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean name="linkmanDao" class="com.zeratul.dao.impl.LinkmanDaoImpl">
+		<!-- 需要给到配置 sessionFactory -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean name="saleVisitDao" class="com.zeratul.dao.impl.SaleVisitDaoImpl">
+		<!-- 需要给到配置 sessionFactory -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+</beans>
